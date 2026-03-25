@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau Quest — 14-Day Learning Path</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f0f13; }
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes badgePop {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .day-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+  .task-row:hover { background: rgba(181, 74, 106, 0.08); }
+  .tab-btn { transition: all 0.2s; }
+  .tab-btn:hover { background: rgba(181, 74, 106, 0.15) !important; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #1a1a22; }
+  ::-webkit-scrollbar-thumb { background: #3a3a4a; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const DAYS = [
+  {
+    day: 1, phase: "INSTALL & ORIENT", title: "Boot Up Your Viz Machine", emoji: "🎮",
+    focus: "Install Tableau Public + First Drag", timeEst: "90 min", xp: 100,
+    tasks: [
+      { text: "Download & install Tableau Public (free)", done: "It opens without errors", time: "10 min", link: "https://public.tableau.com/en-us/s/download" },
+      { text: "Watch: Tableau in 2 Minutes (official overview video)", done: "You can explain what Tableau does to a friend", time: "5 min", link: "https://www.tableau.com/learn/tutorials/on-demand/getting-started" },
+      { text: "Open the built-in Superstore dataset", done: "You see rows of data in the Data Source tab", time: "5 min" },
+      { text: "Drag 'Sales' to Rows and 'Category' to Columns", done: "A bar chart appears on screen", time: "10 min" },
+      { text: "Change the chart type using 'Show Me' panel", done: "You've tried 3+ chart types with the same data", time: "15 min" },
+      { text: "Add color: drag 'Region' to the Color shelf", done: "Bars are now color-coded by region", time: "10 min" },
+      { text: "🏆 BOSS BUILD: Create a bar chart of Sales by Sub-Category, colored by Profit", done: "Save to Tableau Public with title 'Day 1 — My First Viz'", time: "35 min" }
+    ],
+    resources: [
+      { name: "Tableau Public Download", url: "https://public.tableau.com/en-us/s/download" },
+      { name: "Trailhead: Visualize Data with Tableau Basics", url: "https://trailhead.salesforce.com/content/learn/modules/learn-about-tableau" }
+    ],
+    badge: "First Viz Unlocked 🏅"
+  },
+  {
+    day: 2, phase: "INSTALL & ORIENT", title: "The Data Source Whisperer", emoji: "📊",
+    focus: "Connecting data + understanding the workspace", timeEst: "90 min", xp: 120,
+    tasks: [
+      { text: "Learn the 3 zones: Data Source tab, Worksheet, Dashboard", done: "You can navigate between all 3 without hesitation", time: "10 min" },
+      { text: "Connect to an Excel/CSV file (download Superstore CSV from Tableau resources)", done: "Data loads and you see field names", time: "10 min" },
+      { text: "Understand Dimensions (blue) vs Measures (green)", done: "You can point to 3 Dimensions and 3 Measures in Superstore", time: "15 min" },
+      { text: "Rename a field, hide a field, change a data type", done: "You've done all 3 actions successfully", time: "10 min" },
+      { text: "Create a simple filter: drag 'Region' to Filters shelf", done: "Your chart now shows only 1-2 regions", time: "10 min" },
+      { text: "🏆 BOSS BUILD: Create a line chart of Sales over time (Order Date), filtered to only 'Technology' category", done: "Published to Tableau Public as 'Day 2 — Time Series'", time: "35 min" }
+    ],
+    resources: [
+      { name: "Tableau Free Training Videos", url: "https://www.tableau.com/learn/training/20204" },
+      { name: "Trailhead: Tableau Basics", url: "https://trailhead.salesforce.com/content/learn/modules/learn-about-tableau" }
+    ],
+    badge: "Data Connector 🔌"
+  },
+  {
+    day: 3, phase: "CORE SKILLS", title: "Chart Type Champion", emoji: "📈",
+    focus: "Building the 5 essential chart types", timeEst: "2 hrs", xp: 150,
+    tasks: [
+      { text: "Build a BAR CHART: Profit by Category", done: "Bars sorted descending", time: "15 min" },
+      { text: "Build a LINE CHART: Sales trend by month", done: "Continuous date axis with smooth line", time: "15 min" },
+      { text: "Build a SCATTER PLOT: Sales vs Profit, sized by Quantity", done: "Dots vary in size, you can spot outliers", time: "20 min" },
+      { text: "Build a HIGHLIGHT TABLE: Sales by Region × Category", done: "Color intensity shows magnitude", time: "15 min" },
+      { text: "Build a TREE MAP: Sales by Sub-Category", done: "Rectangles sized proportionally", time: "15 min" },
+      { text: "🏆 BOSS BUILD: Create a 'Chart Type Showcase' — all 5 charts in separate sheets, named clearly", done: "All 5 published to Tableau Public as a single workbook", time: "40 min" }
+    ],
+    resources: [
+      { name: "Which Chart to Use? (Tableau Guide)", url: "https://www.tableau.com/learn/whitepapers/which-chart-or-graph-is-right-for-you" },
+      { name: "Trailhead: Build Charts and Analyze Data", url: "https://trailhead.salesforce.com/content/learn/modules/data-analysis-tableau-desktop" }
+    ],
+    badge: "Chart Collector ✨"
+  },
+  {
+    day: 4, phase: "CORE SKILLS", title: "Filter & Sort Sorcery", emoji: "🧙",
+    focus: "Filters, sorting, and interactive controls", timeEst: "90 min", xp: 150,
+    tasks: [
+      { text: "Add a Dimension filter (Category) and show as dropdown", done: "Users can select a category from a dropdown on the viz", time: "15 min" },
+      { text: "Add a Date Range filter on Order Date", done: "Users can slide to pick a date range", time: "15 min" },
+      { text: "Add a Top N filter: show only Top 10 products by Sales", done: "Only 10 bars appear", time: "15 min" },
+      { text: "Sort a bar chart ascending & descending using the toolbar", done: "Bars flip direction on click", time: "5 min" },
+      { text: "Use the 'Pages' shelf to animate data over time", done: "You see data play like a slideshow across years", time: "15 min" },
+      { text: "🏆 BOSS BUILD: Interactive Sales Explorer — bar chart with Category filter, Region color, and date range filter", done: "Published: 'Day 4 — Sales Explorer'", time: "25 min" }
+    ],
+    resources: [
+      { name: "Tableau: Filters Tutorial", url: "https://www.tableau.com/learn/tutorials/on-demand/how-filter" },
+      { name: "YouTube: Tableau Filters Explained", url: "https://www.youtube.com/results?search_query=andy+kriebel+tableau+filters" }
+    ],
+    badge: "Filter Wizard 🧙"
+  },
+  {
+    day: 5, phase: "CORE SKILLS", title: "Calculated Field Crafter", emoji: "🔢",
+    focus: "Basic calculations & parameters", timeEst: "2 hrs", xp: 200,
+    tasks: [
+      { text: "Create your first calculated field: Profit Ratio = SUM([Profit])/SUM([Sales])", done: "New field appears in Measures, formatted as %", time: "20 min" },
+      { text: "Create an IF/THEN field: IF [Profit] > 0 THEN 'Profitable' ELSE 'Loss'", done: "A new dimension with two values appears", time: "15 min" },
+      { text: "Use DATEPART to extract Year and Month from Order Date", done: "You can group your data by year or month", time: "15 min" },
+      { text: "Create a parameter: 'Select Measure' that toggles between Sales and Profit", done: "Chart values change when parameter is toggled", time: "25 min" },
+      { text: "🏆 BOSS BUILD: Profitability Dashboard — scatter plot of Sales vs Profit Ratio, colored by IF/THEN field, with parameter toggle", done: "Published: 'Day 5 — Profitability Analysis'", time: "45 min" }
+    ],
+    resources: [
+      { name: "Tableau: Calculated Fields Overview", url: "https://help.tableau.com/current/pro/desktop/en-us/calculations_calculatedfields_formulas.htm" },
+      { name: "Trailhead: Calculations in Tableau", url: "https://trailhead.salesforce.com/content/learn/modules/calculations-in-tableau" }
+    ],
+    badge: "Calc Commander 🔢"
+  },
+  {
+    day: 6, phase: "CORE SKILLS", title: "Dashboard Day!", emoji: "🖼️",
+    focus: "Building your first multi-sheet dashboard", timeEst: "2 hrs", xp: 250,
+    tasks: [
+      { text: "Create a new Dashboard tab (bottom of Tableau window)", done: "Blank dashboard canvas appears", time: "5 min" },
+      { text: "Set dashboard size (Automatic or Fixed: 1200×800)", done: "Size is set, gray canvas is visible", time: "5 min" },
+      { text: "Drag 3 sheets onto the dashboard using Tiled layout", done: "3 charts appear side by side or stacked", time: "15 min" },
+      { text: "Add a Filter Action: clicking one chart filters the others", done: "Click a bar → other charts update", time: "20 min" },
+      { text: "Add a dashboard title, formatted with your chosen font", done: "Title appears at the top, styled nicely", time: "10 min" },
+      { text: "Add a text box with context/annotation", done: "Dashboard has a short description explaining the data", time: "10 min" },
+      { text: "🏆 BOSS BUILD: 'Superstore Command Center' — 3+ charts, 1 filter action, title, and context annotation", done: "Published: 'Day 6 — Superstore Command Center'", time: "55 min" }
+    ],
+    resources: [
+      { name: "Tableau: Build a Dashboard", url: "https://help.tableau.com/current/pro/desktop/en-us/dashboards_create.htm" },
+      { name: "YouTube: Tableau Dashboard Tutorial", url: "https://www.youtube.com/results?search_query=tableau+dashboard+tutorial+beginner" }
+    ],
+    badge: "Dashboard Builder 🖼️"
+  },
+  {
+    day: 7, phase: "CORE SKILLS", title: "Rest & Review Checkpoint", emoji: "🎯",
+    focus: "Consolidation day — replay, refine, reflect", timeEst: "60-90 min", xp: 150,
+    tasks: [
+      { text: "Review all 6 vizzes on your Tableau Public profile", done: "You can see them all published and accessible", time: "10 min" },
+      { text: "Pick your weakest skill from Days 1-6 and redo that day's Boss Build from scratch", done: "You built it faster and cleaner than the first time", time: "30 min" },
+      { text: "Complete Trailhead badge: 'Visualize Data with Tableau Basics' (if not already)", done: "Badge appears on your Trailhead profile", time: "30 min", link: "https://trailhead.salesforce.com/content/learn/modules/learn-about-tableau" },
+      { text: "Write a 3-sentence reflection: What clicked? What's still fuzzy? What's exciting?", done: "Reflection written down somewhere", time: "10 min" }
+    ],
+    resources: [
+      { name: "Your Tableau Public Profile", url: "https://public.tableau.com/" },
+      { name: "Trailhead: All Tableau Modules", url: "https://trailhead.salesforce.com/en/content/learn/trails" }
+    ],
+    badge: "Week 1 Survivor 🏆"
+  },
+  {
+    day: 8, phase: "INTERMEDIATE", title: "Map Maker", emoji: "🗺️",
+    focus: "Geographic data & map visualizations", timeEst: "90 min", xp: 200,
+    tasks: [
+      { text: "Create a filled map: Sales by State (Superstore)", done: "US map with states colored by Sales amount", time: "15 min" },
+      { text: "Switch to a symbol map with circle sizes", done: "Circles appear on map, sized by a measure", time: "10 min" },
+      { text: "Add a tooltip that shows State, Sales, and Profit on hover", done: "Hovering shows formatted details", time: "15 min" },
+      { text: "Use map layers: add a background map style", done: "Map has a styled background (streets, satellite, etc.)", time: "10 min" },
+      { text: "🏆 BOSS BUILD: Geographic Sales Dashboard — filled map + bar chart of top 10 states, with filter action between them", done: "Published: 'Day 8 — Geographic Sales'", time: "40 min" }
+    ],
+    resources: [
+      { name: "Tableau: Maps Tutorial", url: "https://www.tableau.com/learn/tutorials/on-demand/getting-started-mapping" },
+      { name: "Tableau: Map Types Guide", url: "https://help.tableau.com/current/pro/desktop/en-us/maps_howto.htm" }
+    ],
+    badge: "Cartographer 🗺️"
+  },
+  {
+    day: 9, phase: "INTERMEDIATE", title: "Dual Axis & Combo Charts", emoji: "📉",
+    focus: "Layered charts and advanced formatting", timeEst: "90 min", xp: 200,
+    tasks: [
+      { text: "Create a dual-axis chart: Sales (bars) + Profit (line) over time", done: "Two chart types share the same view with 2 axes", time: "20 min" },
+      { text: "Synchronize axes and format each mark type differently", done: "Bars and line look distinct, axes aligned", time: "10 min" },
+      { text: "Create a combo chart with different mark types per measure", done: "e.g., Circle for one measure, bar for another", time: "15 min" },
+      { text: "Format: change colors, add reference lines for averages", done: "A horizontal reference line shows average Sales", time: "15 min" },
+      { text: "🏆 BOSS BUILD: Executive KPI view — dual axis Sales & Profit trend with reference lines for targets", done: "Published: 'Day 9 — KPI Trends'", time: "30 min" }
+    ],
+    resources: [
+      { name: "Tableau: Dual Axis Charts", url: "https://help.tableau.com/current/pro/desktop/en-us/qs_dual_axis.htm" },
+      { name: "YouTube: Dual Axis Tutorial", url: "https://www.youtube.com/results?search_query=tableau+dual+axis+chart+tutorial" }
+    ],
+    badge: "Dual Wielder ⚔️"
+  },
+  {
+    day: 10, phase: "INTERMEDIATE", title: "Table Calculations & LODs", emoji: "🧮",
+    focus: "Running totals, % of total, and Level of Detail expressions", timeEst: "2 hrs", xp: 250,
+    tasks: [
+      { text: "Add a Quick Table Calc: Running Total of Sales", done: "Line chart shows cumulative Sales growing over time", time: "15 min" },
+      { text: "Add a Quick Table Calc: Percent of Total", done: "Bars show % contribution instead of raw numbers", time: "10 min" },
+      { text: "Create a Year-over-Year growth calculation", done: "You see % change from previous year", time: "20 min" },
+      { text: "Create a FIXED LOD: {FIXED [Category] : SUM([Sales])}", done: "You understand the result is the same regardless of other filters", time: "25 min" },
+      { text: "🏆 BOSS BUILD: Growth Tracker — line chart with YoY growth %, running total view, and LOD comparison", done: "Published: 'Day 10 — Growth Analysis'", time: "50 min" }
+    ],
+    resources: [
+      { name: "Tableau: Table Calculations", url: "https://help.tableau.com/current/pro/desktop/en-us/calculations_tablecalculations.htm" },
+      { name: "Tableau: LOD Expressions Explained", url: "https://help.tableau.com/current/pro/desktop/en-us/calculations_calculatedfields_lod.htm" }
+    ],
+    badge: "LOD Legend 🧮"
+  },
+  {
+    day: 11, phase: "INTERMEDIATE", title: "Storytelling with Data", emoji: "📖",
+    focus: "Tableau Stories + dashboard design principles", timeEst: "90 min", xp: 200,
+    tasks: [
+      { text: "Create a Tableau Story: click 'New Story' tab at bottom", done: "Story workspace appears with story point panel", time: "5 min" },
+      { text: "Add 3+ story points that walk through an insight narrative", done: "Each story point has a caption and shows a different view", time: "25 min" },
+      { text: "Apply design principles: limit to 3-5 colors, left-align text, use whitespace", done: "Dashboard looks intentionally designed, not cluttered", time: "15 min" },
+      { text: "Add annotations directly on marks to highlight key insights", done: "At least 2 annotations pointing to interesting data points", time: "15 min" },
+      { text: "🏆 BOSS BUILD: 'Superstore Story' — 4-point narrative: What sells most? Where? When? What's losing money?", done: "Published: 'Day 11 — Superstore Story'", time: "30 min" }
+    ],
+    resources: [
+      { name: "Tableau: Create a Story", url: "https://help.tableau.com/current/pro/desktop/en-us/story_create.htm" },
+      { name: "Storytelling with Data (blog)", url: "https://www.storytellingwithdata.com/blog" }
+    ],
+    badge: "Data Storyteller 📖"
+  },
+  {
+    day: 12, phase: "CAPSTONE", title: "Choose Your Own Dataset", emoji: "🎲",
+    focus: "Find and connect a real-world dataset you care about", timeEst: "2 hrs", xp: 300,
+    tasks: [
+      { text: "Browse datasets: Kaggle, data.world, or Tableau Community Projects", done: "You've picked a dataset that genuinely interests you", time: "20 min", link: "https://www.kaggle.com/datasets" },
+      { text: "Connect the dataset to Tableau Public", done: "Data loads with correct field types", time: "15 min" },
+      { text: "Explore: create 5+ quick charts to understand the data", done: "You have 5 scratch worksheets with different views", time: "30 min" },
+      { text: "Identify 2-3 key insights or stories in the data", done: "Written down: 'I notice that...' for each insight", time: "15 min" },
+      { text: "🏆 BOSS BUILD: Begin your capstone dashboard — plan the layout on paper/whiteboard first", done: "Paper wireframe exists with planned charts and layout", time: "40 min" }
+    ],
+    resources: [
+      { name: "Kaggle Datasets", url: "https://www.kaggle.com/datasets" },
+      { name: "Tableau Community Projects", url: "https://www.tableau.com/community/community-projects" },
+      { name: "data.world Datasets", url: "https://data.world/" },
+      { name: "#MakeoverMonday", url: "https://www.makeovermonday.co.uk/" }
+    ],
+    badge: "Dataset Hunter 🎲"
+  },
+  {
+    day: 13, phase: "CAPSTONE", title: "Capstone Build Day", emoji: "🏗️",
+    focus: "Build your portfolio-ready dashboard", timeEst: "2.5 hrs", xp: 400,
+    tasks: [
+      { text: "Build Chart 1 for your capstone (the headline visual)", done: "Primary viz is built and formatted", time: "25 min" },
+      { text: "Build Chart 2 (supporting detail)", done: "Second viz adds context", time: "20 min" },
+      { text: "Build Chart 3 (comparison or trend)", done: "Third viz shows change or comparison", time: "20 min" },
+      { text: "Assemble all charts into a dashboard with filter actions", done: "Dashboard is interactive — clicking one chart filters others", time: "25 min" },
+      { text: "Add: title, color legend, context annotation, and tooltip formatting", done: "Dashboard looks polished and professional", time: "20 min" },
+      { text: "Create a 3-point Story to present your findings", done: "Story tab walks through your key insights", time: "20 min" },
+      { text: "🏆 FINAL BOSS: Publish as 'Capstone: [Your Topic]' to Tableau Public", done: "Live on your public profile with a description", time: "30 min" }
+    ],
+    resources: [
+      { name: "Tableau Public Gallery (inspiration)", url: "https://public.tableau.com/app/discover" },
+      { name: "Viz of the Day Archive", url: "https://public.tableau.com/app/discover/viz-of-the-day" }
+    ],
+    badge: "Capstone Champion 🏗️"
+  },
+  {
+    day: 14, phase: "CAPSTONE", title: "Polish, Share & Level Up", emoji: "🚀",
+    focus: "Portfolio finalization + next steps", timeEst: "90 min", xp: 300,
+    tasks: [
+      { text: "Review all your Tableau Public vizzes — fix any formatting issues", done: "Every viz looks clean and intentional", time: "20 min" },
+      { text: "Write a Tableau Public profile bio connecting Tableau to your UX research skills", done: "Bio is live on your profile", time: "15 min" },
+      { text: "Share your capstone on LinkedIn with 3 sentences about what you learned", done: "Post is published", time: "15 min" },
+      { text: "Explore: sign up for one Tableau Community Project (Makeover Monday or Workout Wednesday)", done: "You've bookmarked the project and understand how to participate", time: "15 min", link: "https://www.tableau.com/community/community-projects" },
+      { text: "🏆 FINAL BOSS: Self-assessment — rate yourself 1-5 on: connecting data, chart types, filters, calculations, dashboards, storytelling", done: "Honest self-ratings written down with a plan for what to practice next", time: "15 min" }
+    ],
+    resources: [
+      { name: "Tableau Community Projects", url: "https://www.tableau.com/community/community-projects" },
+      { name: "Trailhead: Cert Prep — Tableau Data Analyst", url: "https://trailhead.salesforce.com/content/learn/modules/cert-prep-tableau-data-analyst" },
+      { name: "Workout Wednesday", url: "https://www.workout-wednesday.com/" }
+    ],
+    badge: "Tableau Proficient 🚀"
+  }
+];
+
+const PHASES = [
+  { name: "INSTALL & ORIENT", color: "#7c3aed", days: "Days 1-2", icon: "⚡" },
+  { name: "CORE SKILLS", color: "#b54a6a", days: "Days 3-7", icon: "🔥" },
+  { name: "INTERMEDIATE", color: "#d97706", days: "Days 8-11", icon: "⚡" },
+  { name: "CAPSTONE", color: "#059669", days: "Days 12-14", icon: "🏆" }
+];
+
+const TOTAL_XP = DAYS.reduce((sum, d) => sum + d.xp, 0);
+
+function TableauQuest() {
+  const [completedTasks, setCompletedTasks] = useState({});
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [earnedBadges, setEarnedBadges] = useState(new Set());
+  const [activeTab, setActiveTab] = useState("roadmap");
+  const confettiTimeout = useRef(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("tableau-quest-progress");
+      if (saved) {
+        const data = JSON.parse(saved);
+        setCompletedTasks(data.completedTasks || {});
+        setEarnedBadges(new Set(data.earnedBadges || []));
+      }
+    } catch (e) {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("tableau-quest-progress", JSON.stringify({
+        completedTasks,
+        earnedBadges: [...earnedBadges]
+      }));
+    } catch (e) {}
+  }, [completedTasks, earnedBadges]);
+
+  const toggleTask = (dayIdx, taskIdx) => {
+    const key = `${dayIdx}-${taskIdx}`;
+    setCompletedTasks(prev => {
+      const next = { ...prev };
+      if (next[key]) delete next[key];
+      else next[key] = true;
+      return next;
+    });
+    const day = DAYS[dayIdx];
+    const allDone = day.tasks.every((_, ti) => {
+      const k = `${dayIdx}-${ti}`;
+      return k === key ? !completedTasks[k] : completedTasks[k];
+    });
+    if (allDone && !earnedBadges.has(dayIdx)) {
+      setEarnedBadges(prev => new Set([...prev, dayIdx]));
+      setShowConfetti(true);
+      if (confettiTimeout.current) clearTimeout(confettiTimeout.current);
+      confettiTimeout.current = setTimeout(() => setShowConfetti(false), 3000);
+    }
+  };
+
+  const getDayProgress = (dayIdx) => {
+    const day = DAYS[dayIdx];
+    const done = day.tasks.filter((_, ti) => completedTasks[`${dayIdx}-${ti}`]).length;
+    return { done, total: day.tasks.length, pct: Math.round((done / day.tasks.length) * 100) };
+  };
+
+  const totalXPEarned = DAYS.reduce((sum, day, di) => {
+    const prog = getDayProgress(di);
+    return sum + (prog.pct === 100 ? day.xp : Math.round(day.xp * prog.pct / 100 * 0.5));
+  }, 0);
+
+  const totalTasksDone = Object.keys(completedTasks).length;
+  const totalTasks = DAYS.reduce((s, d) => s + d.tasks.length, 0);
+
+  const getLevel = () => {
+    if (totalXPEarned < 300) return { level: 1, title: "Data Padawan", next: 300 };
+    if (totalXPEarned < 700) return { level: 2, title: "Chart Apprentice", next: 700 };
+    if (totalXPEarned < 1200) return { level: 3, title: "Viz Journeyman", next: 1200 };
+    if (totalXPEarned < 1800) return { level: 4, title: "Dashboard Knight", next: 1800 };
+    if (totalXPEarned < 2500) return { level: 5, title: "Tableau Warrior", next: 2500 };
+    return { level: 6, title: "Visualization Master", next: TOTAL_XP };
+  };
+
+  const level = getLevel();
+  const phaseForDay = (d) => PHASES.find(p => p.name === d.phase);
+
+  return (
+    <div style={{
+      fontFamily: "'Source Sans 3', 'Source Sans Pro', system-ui, sans-serif",
+      background: "#0f0f13", color: "#e8e4e0", minHeight: "100vh", position: "relative", overflow: "hidden"
+    }}>
+      {showConfetti && (
+        <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 999 }}>
+          {Array.from({ length: 40 }).map((_, i) => (
+            <div key={i} style={{
+              position: "absolute", left: `${Math.random() * 100}%`, top: "-20px",
+              width: `${6 + Math.random() * 8}px`, height: `${6 + Math.random() * 8}px`,
+              background: ["#b54a6a", "#7c3aed", "#d97706", "#059669", "#f472b6", "#fbbf24"][Math.floor(Math.random() * 6)],
+              borderRadius: Math.random() > 0.5 ? "50%" : "2px",
+              animation: `confettiFall ${1.5 + Math.random() * 2}s ease-in forwards`,
+              animationDelay: `${Math.random() * 0.5}s`,
+              transform: `rotate(${Math.random() * 360}deg)`
+            }} />
+          ))}
+        </div>
+      )}
+
+      {/* Header */}
+      <div style={{
+        background: "linear-gradient(135deg, #1a1020 0%, #0f0f13 50%, #151218 100%)",
+        borderBottom: "1px solid rgba(181, 74, 106, 0.2)", padding: "28px 24px 20px"
+      }}>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
+            <span style={{ fontSize: 28 }}>🎮</span>
+            <h1 style={{
+              fontFamily: "'Playfair Display', Georgia, serif", fontSize: "clamp(24px, 4vw, 34px)",
+              fontWeight: 800, margin: 0,
+              background: "linear-gradient(135deg, #f0c6d4, #b54a6a, #7c3aed)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent"
+            }}>Tableau Quest</h1>
+          </div>
+          <p style={{ color: "#9a8f9e", margin: "4px 0 16px", fontSize: 14, fontWeight: 300 }}>
+            14-day gamified learning path — zero to proficient
+          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4, color: "#9a8f9e" }}>
+                <span>LVL {level.level} — {level.title}</span>
+                <span>{totalXPEarned} / {level.next} XP</span>
+              </div>
+              <div style={{ height: 10, borderRadius: 5, background: "#1e1e2a", overflow: "hidden", border: "1px solid rgba(181,74,106,0.15)" }}>
+                <div style={{ height: "100%", borderRadius: 5, background: "linear-gradient(90deg, #b54a6a, #7c3aed)",
+                  width: `${Math.min(100, (totalXPEarned / level.next) * 100)}%`, transition: "width 0.6s ease" }} />
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 16, fontSize: 13 }}>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ color: "#b54a6a", fontWeight: 700, fontSize: 20 }}>{totalTasksDone}</div>
+                <div style={{ color: "#6a6070", fontSize: 11 }}>of {totalTasks} tasks</div>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ color: "#7c3aed", fontWeight: 700, fontSize: 20 }}>{earnedBadges.size}</div>
+                <div style={{ color: "#6a6070", fontSize: 11 }}>of 14 badges</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "12px 24px 0", display: "flex", gap: 4 }}>
+        {[
+          { id: "roadmap", label: "Roadmap", icon: "🗺️" },
+          { id: "badges", label: "Badges", icon: "🏅" },
+          { id: "resources", label: "Resources", icon: "📚" }
+        ].map(tab => (
+          <button key={tab.id} className="tab-btn" onClick={() => { setActiveTab(tab.id); setSelectedDay(null); }} style={{
+            background: activeTab === tab.id ? "rgba(181, 74, 106, 0.2)" : "transparent",
+            border: activeTab === tab.id ? "1px solid rgba(181,74,106,0.3)" : "1px solid transparent",
+            color: activeTab === tab.id ? "#f0c6d4" : "#6a6070",
+            padding: "8px 16px", borderRadius: "8px 8px 0 0", cursor: "pointer",
+            fontSize: 13, fontWeight: activeTab === tab.id ? 600 : 400, fontFamily: "inherit"
+          }}>{tab.icon} {tab.label}</button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "16px 24px 40px" }}>
+
+        {activeTab === "roadmap" && !selectedDay && selectedDay !== 0 && (
+          <div>
+            {PHASES.map((phase, pi) => (
+              <div key={pi} style={{ marginBottom: 28 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                  <span style={{ fontSize: 18 }}>{phase.icon}</span>
+                  <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 18, fontWeight: 700, margin: 0, color: phase.color }}>{phase.name}</h2>
+                  <span style={{ fontSize: 12, color: "#6a6070", marginLeft: 4 }}>{phase.days}</span>
+                </div>
+                <div style={{ display: "grid", gap: 10 }}>
+                  {DAYS.filter(d => d.phase === phase.name).map((day) => {
+                    const di = day.day - 1;
+                    const prog = getDayProgress(di);
+                    const isComplete = prog.pct === 100;
+                    return (
+                      <button key={di} className="day-card" onClick={() => setSelectedDay(di)} style={{
+                        display: "flex", alignItems: "center", gap: 14,
+                        background: isComplete ? "linear-gradient(135deg, rgba(5,150,105,0.12), rgba(5,150,105,0.04))" : "rgba(26, 24, 34, 0.7)",
+                        border: isComplete ? "1px solid rgba(5,150,105,0.3)" : "1px solid rgba(60,56,70,0.4)",
+                        borderRadius: 12, padding: "14px 18px", cursor: "pointer", transition: "all 0.2s",
+                        width: "100%", textAlign: "left", fontFamily: "inherit", color: "inherit"
+                      }}>
+                        <div style={{
+                          width: 44, height: 44, borderRadius: 10,
+                          background: isComplete ? "rgba(5,150,105,0.2)" : `${phase.color}15`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 22, flexShrink: 0,
+                          border: `1px solid ${isComplete ? "rgba(5,150,105,0.3)" : phase.color + "30"}`
+                        }}>{isComplete ? "✅" : day.emoji}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+                            <span style={{ fontSize: 11, color: phase.color, fontWeight: 600 }}>DAY {day.day}</span>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: isComplete ? "#6ee7b7" : "#e8e4e0",
+                              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{day.title}</span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <div style={{ flex: 1, height: 4, borderRadius: 2, background: "#2a2834", maxWidth: 120 }}>
+                              <div style={{ height: "100%", borderRadius: 2, background: isComplete ? "#059669" : phase.color,
+                                width: `${prog.pct}%`, transition: "width 0.4s ease" }} />
+                            </div>
+                            <span style={{ fontSize: 11, color: "#6a6070" }}>{prog.done}/{prog.total}</span>
+                            <span style={{ fontSize: 11, color: "#4a4656" }}>•</span>
+                            <span style={{ fontSize: 11, color: "#6a6070" }}>{day.timeEst}</span>
+                            <span style={{ fontSize: 11, color: "#4a4656" }}>•</span>
+                            <span style={{ fontSize: 11, color: "#b54a6a" }}>{day.xp} XP</span>
+                          </div>
+                        </div>
+                        <div style={{ color: "#4a4656", fontSize: 18 }}>›</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {activeTab === "roadmap" && (selectedDay !== null || selectedDay === 0) && (() => {
+          const di = selectedDay;
+          if (di === null) return null;
+          const day = DAYS[di];
+          const phase = phaseForDay(day);
+          const prog = getDayProgress(di);
+          return (
+            <div style={{ animation: "slideUp 0.3s ease" }}>
+              <button onClick={() => setSelectedDay(null)} style={{
+                background: "none", border: "none", color: "#b54a6a", cursor: "pointer",
+                fontSize: 13, padding: "4px 0", marginBottom: 12, fontFamily: "inherit",
+                display: "flex", alignItems: "center", gap: 4
+              }}>← Back to roadmap</button>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+                <span style={{ fontSize: 32 }}>{day.emoji}</span>
+                <div>
+                  <span style={{ fontSize: 11, color: phase.color, fontWeight: 600 }}>DAY {day.day} — {day.phase}</span>
+                  <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: "clamp(20px, 3vw, 26px)", fontWeight: 800, margin: 0, color: "#e8e4e0" }}>{day.title}</h2>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 20, fontSize: 13, color: "#9a8f9e" }}>
+                <span>🎯 {day.focus}</span><span>⏱️ {day.timeEst}</span>
+                <span style={{ color: "#b54a6a" }}>⭐ {day.xp} XP</span>
+                <span>{prog.done}/{prog.total} complete</span>
+              </div>
+              <div style={{ height: 6, borderRadius: 3, background: "#1e1e2a", marginBottom: 20, overflow: "hidden" }}>
+                <div style={{ height: "100%", borderRadius: 3,
+                  background: prog.pct === 100 ? "#059669" : `linear-gradient(90deg, ${phase.color}, #7c3aed)`,
+                  width: `${prog.pct}%`, transition: "width 0.4s ease" }} />
+              </div>
+              <div style={{ display: "grid", gap: 6 }}>
+                {day.tasks.map((task, ti) => {
+                  const key = `${di}-${ti}`;
+                  const isDone = completedTasks[key];
+                  const isBoss = task.text.startsWith("🏆");
+                  return (
+                    <div key={ti} className="task-row" onClick={() => toggleTask(di, ti)} style={{
+                      display: "flex", gap: 12, padding: "12px 14px",
+                      background: isBoss ? (isDone ? "rgba(5,150,105,0.1)" : "rgba(181, 74, 106, 0.06)")
+                        : (isDone ? "rgba(5,150,105,0.05)" : "rgba(26, 24, 34, 0.5)"),
+                      border: isBoss ? `1px solid ${isDone ? "rgba(5,150,105,0.2)" : "rgba(181,74,106,0.2)"}`
+                        : "1px solid rgba(60,56,70,0.2)",
+                      borderRadius: 10, cursor: "pointer", transition: "all 0.15s", alignItems: "flex-start"
+                    }}>
+                      <div style={{
+                        width: 22, height: 22, borderRadius: 6, flexShrink: 0, marginTop: 1,
+                        border: isDone ? "none" : `2px solid ${isBoss ? "#b54a6a" : "#3a3846"}`,
+                        background: isDone ? "#059669" : "transparent",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 12, color: "#fff", transition: "all 0.2s"
+                      }}>{isDone && "✓"}</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 14, fontWeight: isBoss ? 600 : 400,
+                          color: isDone ? "#6a6070" : (isBoss ? "#f0c6d4" : "#d4d0cc"),
+                          textDecoration: isDone ? "line-through" : "none", lineHeight: 1.4 }}>{task.text}</div>
+                        <div style={{ fontSize: 12, color: isDone ? "#4a4656" : "#7a7484", marginTop: 4, lineHeight: 1.4 }}>
+                          ✅ Done when: {task.done}
+                        </div>
+                        <div style={{ display: "flex", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
+                          <span style={{ fontSize: 11, color: "#5a5466" }}>⏱️ {task.time}</span>
+                          {task.link && (
+                            <a href={task.link} target="_blank" rel="noopener noreferrer"
+                              onClick={e => e.stopPropagation()}
+                              style={{ fontSize: 11, color: "#7c3aed", textDecoration: "none" }}>
+                              🔗 Open resource →
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {prog.pct === 100 && (
+                <div style={{
+                  marginTop: 20, padding: 20, borderRadius: 12,
+                  background: "linear-gradient(135deg, rgba(5,150,105,0.1), rgba(124,58,237,0.1))",
+                  border: "1px solid rgba(5,150,105,0.2)", textAlign: "center", animation: "badgePop 0.4s ease"
+                }}>
+                  <div style={{ fontSize: 36 }}>🏅</div>
+                  <div style={{ fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: 18, fontWeight: 700, color: "#6ee7b7", marginTop: 4 }}>Badge Earned!</div>
+                  <div style={{ fontSize: 15, color: "#9a8f9e" }}>{day.badge}</div>
+                </div>
+              )}
+              <div style={{ marginTop: 20 }}>
+                <h3 style={{ fontSize: 14, color: "#7a7484", fontWeight: 600, marginBottom: 8 }}>📚 Day {day.day} Resources</h3>
+                <div style={{ display: "grid", gap: 6 }}>
+                  {day.resources.map((r, ri) => (
+                    <a key={ri} href={r.url} target="_blank" rel="noopener noreferrer" style={{
+                      display: "block", padding: "10px 14px", background: "rgba(26, 24, 34, 0.5)",
+                      border: "1px solid rgba(60,56,70,0.2)", borderRadius: 8, textDecoration: "none",
+                      color: "#b3adb8", fontSize: 13
+                    }}><span style={{ color: "#7c3aed" }}>→</span> {r.name}</a>
+                  ))}
+                </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 24 }}>
+                {di > 0 ? (
+                  <button onClick={() => setSelectedDay(di - 1)} style={{
+                    background: "rgba(26,24,34,0.7)", border: "1px solid rgba(60,56,70,0.3)",
+                    color: "#9a8f9e", padding: "8px 16px", borderRadius: 8, cursor: "pointer",
+                    fontSize: 13, fontFamily: "inherit"
+                  }}>← Day {di}</button>
+                ) : <div />}
+                {di < DAYS.length - 1 ? (
+                  <button onClick={() => setSelectedDay(di + 1)} style={{
+                    background: "rgba(181,74,106,0.15)", border: "1px solid rgba(181,74,106,0.3)",
+                    color: "#f0c6d4", padding: "8px 16px", borderRadius: 8, cursor: "pointer",
+                    fontSize: 13, fontFamily: "inherit"
+                  }}>Day {di + 2} →</button>
+                ) : <div />}
+              </div>
+            </div>
+          );
+        })()}
+
+        {activeTab === "badges" && (
+          <div style={{ animation: "slideUp 0.3s ease" }}>
+            <p style={{ color: "#7a7484", fontSize: 14, marginBottom: 20 }}>
+              Complete all tasks in a day to earn its badge. Collect all 14 to become a Visualization Master.
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 12 }}>
+              {DAYS.map((day, di) => {
+                const earned = earnedBadges.has(di);
+                return (
+                  <div key={di} onClick={() => { setSelectedDay(di); setActiveTab("roadmap"); }} style={{
+                    padding: 16, borderRadius: 12, textAlign: "center", cursor: "pointer",
+                    background: earned ? "linear-gradient(135deg, rgba(5,150,105,0.12), rgba(124,58,237,0.08))" : "rgba(26, 24, 34, 0.5)",
+                    border: earned ? "1px solid rgba(5,150,105,0.3)" : "1px solid rgba(60,56,70,0.2)",
+                    opacity: earned ? 1 : 0.5, transition: "all 0.2s"
+                  }}>
+                    <div style={{ fontSize: 28, marginBottom: 4, filter: earned ? "none" : "grayscale(1)" }}>{day.emoji}</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: earned ? "#6ee7b7" : "#4a4656" }}>Day {day.day}</div>
+                    <div style={{ fontSize: 12, color: earned ? "#d4d0cc" : "#3a3846", marginTop: 2, lineHeight: 1.3 }}>
+                      {day.badge.replace(/\s*[🏅🔌✨🧙🔢🖼️🏆🗺️⚔️🧮📖🎲🏗️🚀]/g, "")}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "resources" && (
+          <div style={{ animation: "slideUp 0.3s ease" }}>
+            <div style={{ display: "grid", gap: 16 }}>
+              {[
+                { cat: "🆓 Free Tools", items: [
+                  { name: "Tableau Public (Free Desktop App)", url: "https://public.tableau.com/en-us/s/download", note: "Your main practice tool — free forever" },
+                  { name: "Superstore Sample Dataset", url: "https://public.tableau.com/app/learn/sample-data", note: "Built into Tableau, perfect for learning" }
+                ]},
+                { cat: "🎓 Core Learning", items: [
+                  { name: "Trailhead — Tableau Basics Badge", url: "https://trailhead.salesforce.com/content/learn/modules/learn-about-tableau", note: "Free, gamified (you earn badges!), beginner-friendly" },
+                  { name: "Coursera — Data Visualization with Tableau", url: "https://www.coursera.org/specializations/data-visualization", note: "Audit for free, structured specialization" },
+                  { name: "Tableau Free Training Videos", url: "https://www.tableau.com/learn/training/20204", note: "Official video library from Tableau" }
+                ]},
+                { cat: "🏋️ Practice & Community", items: [
+                  { name: "Makeover Monday", url: "https://www.makeovermonday.co.uk/", note: "Weekly dataset + community challenge" },
+                  { name: "Workout Wednesday", url: "https://www.workout-wednesday.com/", note: "Weekly hands-on challenge to recreate a viz" },
+                  { name: "Tableau Community Projects", url: "https://www.tableau.com/community/community-projects", note: "20+ community-led challenges at all levels" },
+                  { name: "Viz of the Day Gallery", url: "https://public.tableau.com/app/discover/viz-of-the-day", note: "Daily inspiration from the best community vizzes" }
+                ]},
+                { cat: "📊 Datasets", items: [
+                  { name: "Kaggle Datasets", url: "https://www.kaggle.com/datasets", note: "50K+ free datasets — filter by topic" },
+                  { name: "data.world", url: "https://data.world/", note: "Curated datasets, great for social impact topics" },
+                  { name: "Real World Fake Data", url: "https://data.world/markbradbourne/rwfd-real-world-fake-data", note: "Realistic business data for practice" }
+                ]},
+                { cat: "🏅 Certification Path", items: [
+                  { name: "Trailhead — Cert Prep: Tableau Data Analyst", url: "https://trailhead.salesforce.com/content/learn/modules/cert-prep-tableau-data-analyst", note: "Free prep module for official cert" },
+                  { name: "Tableau Certification Info", url: "https://www.tableau.com/learn/certification", note: "Desktop Specialist → Data Analyst → Desktop Professional" }
+                ]}
+              ].map((section, si) => (
+                <div key={si}>
+                  <h3 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 16, fontWeight: 700, color: "#d4d0cc", marginBottom: 8 }}>{section.cat}</h3>
+                  <div style={{ display: "grid", gap: 6 }}>
+                    {section.items.map((item, ii) => (
+                      <a key={ii} href={item.url} target="_blank" rel="noopener noreferrer" style={{
+                        display: "block", padding: "12px 16px", background: "rgba(26, 24, 34, 0.5)",
+                        border: "1px solid rgba(60,56,70,0.2)", borderRadius: 10, textDecoration: "none"
+                      }}>
+                        <div style={{ fontSize: 14, color: "#e8e4e0", fontWeight: 500 }}>{item.name}</div>
+                        <div style={{ fontSize: 12, color: "#6a6070", marginTop: 2 }}>{item.note}</div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(TableauQuest));
+</script>
+</body>
+</html>
